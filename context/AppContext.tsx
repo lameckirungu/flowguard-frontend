@@ -56,10 +56,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   useEffect(() => {
-    if (pathname === "/login") return;
+    if (pathname === "/login" || data) return;
     const timer = window.setTimeout(() => void refreshData(), 0);
     return () => window.clearTimeout(timer);
-  }, [pathname, refreshData]);
+  }, [pathname, data, refreshData]);
 
   const showToast = useCallback((message: string) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
