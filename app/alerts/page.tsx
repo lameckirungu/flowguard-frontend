@@ -1,68 +1,8 @@
 "use client";
-
+import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { atRiskPumps } from "@/lib/selectors";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { RiskBadge } from "@/components/ui/Badge";
-import { WARN, days, pct, riskColorVar, stationName } from "@/lib/utils";
-
-export default function AlertsPage() {
-  const { openPump, showToast } = useAppContext();
-
-  return (
-    <div className="animate-fade-in-up">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[24px] font-extrabold tracking-tight">Active alerts</h1>
-          <p className="mt-1 text-[13px] text-text-mute">
-            {atRiskPumps.length} pumps above the {(WARN * 100).toFixed(0)}% risk threshold.
-          </p>
-        </div>
-        <Button onClick={() => showToast("Alert digest sent to on-call planner")}>Send digest</Button>
-      </div>
-
-      <div className="space-y-3">
-        {atRiskPumps.map((p) => (
-          <Card key={p.pump_id} className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-squircle-sm text-[17px]"
-                style={{ background: p.risk_probability > 0.5 ? "var(--color-red-light)" : "var(--color-amber-light)" }}
-              >
-                ⚙
-              </div>
-              <div>
-                <div className="flex items-center gap-2 text-[14px] font-extrabold">
-                  {p.pump_id}
-                  <RiskBadge risk={p.risk_probability} />
-                </div>
-                <div className="text-[12px] text-text-mute">
-                  {p.station_code} — {stationName(p.station_code)} · Top driver:{" "}
-                  {p.shap_top_features[0].feature.replace(/_/g, " ")}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-5">
-              <div>
-                <div className="text-[11.5px] font-semibold text-text-mute">Risk</div>
-                <div className="text-[15px] font-extrabold" style={{ color: riskColorVar(p.risk_probability) }}>
-                  {pct(p.risk_probability)}
-                </div>
-              </div>
-              <div>
-                <div className="text-[11.5px] font-semibold text-text-mute">Lead time</div>
-                <div className="text-[15px] font-extrabold">
-                  {p.rul_hours !== null ? `${days(p.rul_hours)} days` : "—"}
-                </div>
-              </div>
-              <Button size="sm" onClick={() => openPump(p.pump_id)}>
-                Inspect
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { Card } from "@/components/ui/Card"; import { Button } from "@/components/ui/Button"; import { Badge } from "@/components/ui/Badge"; import { Icon } from "@/components/ui/Icon";
+import { api, type Alert } from "@/lib/resources";
+export default function AlertsPage(){const {pumps,openPump,showToast,capabilities,user,can}=useAppContext(); const [items,setItems]=useState<Alert[]>([]); const load=useCallback(()=>api<Alert[]>("/alerts").then(setItems).catch((e:Error)=>showToast(e.message)),[showToast]); useEffect(()=>{void load()},[load]);
+async function generate(){const r=await api<{message:string}>("/alerts/auto-generate",{method:"POST"});showToast(r.message);await load()} async function acknowledge(id:string){await api(`/alerts/${id}`,{method:"PATCH",body:JSON.stringify({status:"acknowledged",acknowledged_at:new Date().toISOString()})});showToast("Alert acknowledged");await load()} async function digest(){if(!user)return;try{const r=await api<{message:string}>("/alerts/digest",{method:"POST",body:JSON.stringify({recipient:user.email})});showToast(r.message)}catch(e){showToast((e as Error).message)}}
+return <div className="animate-fade-in-up"><header className="mb-6 flex flex-wrap items-start justify-between gap-3"><div><h1>Active alerts</h1><p className="mt-1 text-sm text-muted-foreground">Persisted alerts with acknowledgement history.</p></div><div className="flex gap-2">{can("manage_alerts")&&<Button variant="ghost" onClick={generate} disabled={!capabilities?.automatic_alerts}><Icon name="refresh" className="mr-2 h-4 w-4"/>Generate</Button>}{can("manage_alerts")&&<Button onClick={digest} disabled={!capabilities?.smtp_digest}>Send digest</Button>}</div></header><div className="space-y-3">{items.map(item=>{const pump=pumps.find(p=>p.id===item.pump_id);return <Card key={item.id} className="flex flex-wrap items-center justify-between gap-4"><div className="flex gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-status-critical-bg text-status-critical"><Icon name="alert" className="h-[18px] w-[18px]"/></span><div><div className="flex items-center gap-2 font-semibold">{pump?.pump_id??"Pump"}<Badge tone={item.severity==="critical"?"critical":"watch"}>{item.severity}</Badge></div><p className="mt-1 text-xs text-muted-foreground">{item.message} · {new Date(item.triggered_at).toLocaleString()}</p></div></div><div className="flex gap-2"><Button size="sm" variant="ghost" onClick={()=>pump&&openPump(pump.pump_id)}>Inspect</Button>{item.status==="triggered"&&can("manage_alerts")&&<Button size="sm" onClick={()=>acknowledge(item.id)}>Acknowledge</Button>}</div></Card>})}{items.length===0&&<Card className="text-center text-sm text-muted-foreground">No active alerts. Generate from current model output.</Card>}</div></div>}

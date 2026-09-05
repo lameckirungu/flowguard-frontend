@@ -1,13 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { pumps } from "@/data/mockData";
 import { useAppContext } from "@/context/AppContext";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { RiskBadge } from "@/components/ui/Badge";
-import { criticalPumps, atRiskPumps } from "@/lib/selectors";
-import { pct, days, sortByRiskDesc, stationName } from "@/lib/utils";
+import { pct, days, sortByRiskDesc } from "@/lib/utils";
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -17,7 +15,7 @@ const FILTERS = [
 ] as const;
 
 export function PumpFleetView() {
-  const { openPump } = useAppContext();
+  const { openPump, pumps, criticalPumps, atRiskPumps, stationName } = useAppContext();
   const router = useRouter();
   const searchParams = useSearchParams();
 

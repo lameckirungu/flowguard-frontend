@@ -1,9 +1,11 @@
-import { modelMetrics } from "@/data/mockData";
-import { atRiskPumps } from "@/lib/selectors";
+"use client";
+
+import { useAppContext } from "@/context/AppContext";
 import { Card } from "@/components/ui/Card";
 import { days, pct } from "@/lib/utils";
 
 export default function ModelPage() {
+  const { modelMetrics, atRiskPumps } = useAppContext();
   const cm = modelMetrics.confusion_matrix;
   const falseAlarm = cm[0][1] / (cm[0][0] + cm[0][1]);
   const minLeadDays = atRiskPumps.length
@@ -103,8 +105,8 @@ export default function ModelPage() {
             </div>
           ))}
           <div className="mt-3.5 rounded-squircle bg-amber-light p-3.5 text-[11.5px] leading-[1.6] text-[#8A5410]">
-            <b>Caveat.</b> These figures are from synthetic, physics-informed data. Recalibration against real KPC
-            SCADA history is required before any operational claim — this is the core of the KPC ask.
+            <b>Caveat.</b> These figures are from synthetic, physics-informed data. Recalibration against real operational
+            SCADA history is required before any operational claim — this is the core production-readiness requirement.
           </div>
         </Card>
       </div>

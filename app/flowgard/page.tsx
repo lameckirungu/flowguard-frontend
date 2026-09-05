@@ -1,15 +1,13 @@
 "use client";
 
-import { pumps } from "@/data/mockData";
 import { useAppContext } from "@/context/AppContext";
 import { Card } from "@/components/ui/Card";
 import { RiskBadge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { atRiskPumps, healthyPumps } from "@/lib/selectors";
-import { riskColorVar, stationName } from "@/lib/utils";
+import { riskColorVar } from "@/lib/utils";
 
 export default function FlowgardPage() {
-  const { openPump } = useAppContext();
+  const { openPump, pumps, atRiskPumps, healthyPumps, stationName } = useAppContext();
   const avgHealthy = healthyPumps.reduce((s, p) => s + p.health_deviation_index, 0) / healthyPumps.length;
   const avgRisk = atRiskPumps.reduce((s, p) => s + p.health_deviation_index, 0) / atRiskPumps.length;
   const ranked = [...pumps].sort((a, b) => b.health_deviation_index - a.health_deviation_index).slice(0, 14);

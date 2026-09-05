@@ -1,48 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  /* ---- Typography ---- */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", ui-monospace, "Menlo", "Cascadia Code", monospace;
-
-  /* ---- Apple-inspired system colors ---- */
-  --color-dark: #0b1420;
-  --color-dark-2: #101c2e;
-  --color-bg: #f5f5f7;
-  --color-surface: #ffffff;
-  --color-border: rgba(60, 60, 67, 0.12);
-  --color-border-strong: rgba(60, 60, 67, 0.22);
-  --color-text: #1d1d1f;
-  --color-text-mute: #6e6e73;
-  --color-text-faint: #86868b;
-
-  --color-blue: #0a84ff;
-  --color-blue-light: #e8f1ff;
-  --color-teal: #12a4a0;
-  --color-teal-light: #e3f6f4;
-  --color-green: #30b950;
-  --color-green-light: #e7f8ec;
-  --color-amber: #ff9f0a;
-  --color-amber-light: #fff2e0;
-  --color-red: #ff3b30;
-  --color-red-light: #ffebea;
-  --color-purple: #af52de;
-  --color-purple-light: #f5eafb;
-
-  /* ---- Squircle-like radii ---- */
-  --radius-squircle-sm: 12px;
-  --radius-squircle: 18px;
-  --radius-squircle-lg: 24px;
-  --radius-squircle-xl: 30px;
-  --radius-pill: 999px;
-
-  /* ---- Soft, diffused depth ---- */
-  --shadow-soft: 0 1px 2px rgba(20, 24, 38, 0.04), 0 8px 24px rgba(20, 24, 38, 0.06);
-  --shadow-medium: 0 2px 8px rgba(20, 24, 38, 0.06), 0 16px 40px rgba(20, 24, 38, 0.10);
-  --shadow-elevated: 0 8px 16px rgba(15, 20, 35, 0.10), 0 24px 64px rgba(15, 20, 35, 0.18);
-
-  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+  --color-background: #f7f6f4; --color-bg: #f7f6f4;
+  --color-foreground: #26221f; --color-text: #26221f;
+  --color-card: #ffffff; --color-surface: #ffffff;
+  --color-muted: #f1ede9; --color-accent: #f1ede9;
+  --color-muted-foreground: #736c67; --color-text-mute: #736c67; --color-text-faint: #89817b;
+  --color-border: #e8e3de; --color-border-strong: #d8d0c9;
+  --color-primary: #b3312c; --color-teal: #b3312c; --color-teal-light: #f8e9e7;
+  --color-blue: #2a78d6; --color-blue-light: #eaf2fc;
+  --color-green: #0ca30c; --color-green-light: #eaf7ea;
+  --color-amber: #b6790a; --color-amber-light: #fdf3de;
+  --color-red: #d03b3b; --color-red-light: #fdecec;
+  --color-purple: #7b61c9; --color-purple-light: #f0ecfb;
+  --color-sidebar: #1f1b19; --color-sidebar-foreground: #f5f2ef; --color-sidebar-muted: #b2aeac; --color-sidebar-border: #322019; --color-sidebar-accent: #3f201e; --color-sidebar-primary: #b3312c;
+  --color-status-critical: #d03b3b; --color-status-critical-bg: #fdecec; --color-status-high: #ec835a; --color-status-high-bg: #fdf0e9; --color-status-medium: #b6790a; --color-status-medium-bg: #fdf3de; --color-status-low: #0ca30c; --color-status-low-bg: #eaf7ea; --color-status-info: #2a78d6; --color-status-info-bg: #eaf2fc;
+  --radius-squircle-sm: 8px; --radius-squircle: 10px; --radius-squircle-lg: 12px; --radius-squircle-xl: 16px; --radius-pill: 999px;
+  --shadow-soft: 0 1px 2px rgba(38,34,31,.04), 0 3px 10px rgba(38,34,31,.05);
+  --shadow-medium: 0 5px 18px rgba(38,34,31,.09); --shadow-elevated: 0 18px 48px rgba(38,34,31,.18);
+  --ease-spring: cubic-bezier(.22,1,.36,1);
 }
 
 html {
@@ -148,3 +126,9 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.28s var(--ease-spring) both;
 }
+
+h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 1.125rem; font-weight: 700; }
+table { font-size: .875rem; }
+th { font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }

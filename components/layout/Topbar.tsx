@@ -4,60 +4,29 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
-import { pumps, stations } from "@/data/mockData";
-import { atRiskPumps } from "@/lib/selectors";
+import { Icon } from "@/components/ui/Icon";
 
 export function Topbar() {
-  const { openPump } = useAppContext();
+  const { openPump, pumps, stations, atRiskPumps } = useAppContext();
   const router = useRouter();
   const [query, setQuery] = useState("");
-
-  function handleSearch(value: string) {
+  function search(value: string) {
     setQuery(value);
     if (value.trim().length < 2) return;
-    const normalized = value.trim().toLowerCase();
-    const pumpHit = pumps.find((p) => p.pump_id.toLowerCase().includes(normalized));
-    if (pumpHit) {
-      openPump(pumpHit.pump_id);
-      return;
-    }
-
-    const stationHit = stations.find(
-      (station) => station.code.toLowerCase().includes(normalized) || station.name.toLowerCase().includes(normalized)
-    );
-    if (stationHit) router.push("/pumps?station=" + encodeURIComponent(stationHit.code));
+    const term = value.trim().toLowerCase();
+    const pump = pumps.find((item) => item.pump_id.toLowerCase().includes(term));
+    if (pump) return openPump(pump.pump_id);
+    const station = stations.find((item) => item.code.toLowerCase().includes(term) || item.name.toLowerCase().includes(term));
+    if (station) router.push(`/pumps?station=${encodeURIComponent(station.code)}`);
   }
-
-  return (
-    <header className="glass-light flex items-center justify-between gap-4 border-b border-border px-6 py-3.5">
-      <input
-        value={query}
-        aria-label="Search pumps, stations, and work orders"
-        onChange={(e) => handleSearch(e.target.value)}
-        placeholder="Search pumps, stations, work orders..."
-        className="w-full max-w-[420px] rounded-squircle-sm border border-border bg-bg px-4 py-2.5 text-[13px] outline-none transition-shadow focus:border-teal focus:ring-2 focus:ring-teal/20"
-      />
-      <div className="flex shrink-0 items-center gap-4">
-        <Link
-          href="/alerts"
-          aria-label={`Active alerts${atRiskPumps.length > 0 ? ` (${atRiskPumps.length})` : ""}`}
-          className="relative flex h-9 w-9 items-center justify-center rounded-full text-[16px] transition-colors hover:bg-black/[0.04]"
-        >
-          ⚠
-          {atRiskPumps.length > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 rounded-pill bg-red px-1.5 py-0 text-[9.5px] font-bold text-white">
-              {atRiskPumps.length}
-            </span>
-          )}
-        </Link>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal text-[12px] font-bold text-white shadow-soft">
-          LM
-        </div>
-        <div>
-          <div className="text-[12.5px] font-bold leading-tight">L. Mugo</div>
-          <div className="text-[11px] leading-tight text-text-mute">Maintenance planner</div>
-        </div>
-      </div>
-    </header>
-  );
+  return <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-background/80 px-6 backdrop-blur-md">
+    <label className="flex w-full max-w-md items-center gap-2 rounded-md border border-border bg-muted/60 px-3 py-1.5 text-muted-foreground">
+      <Icon name="search" className="h-4 w-4 shrink-0" />
+      <input value={query} onChange={(event) => search(event.target.value)} aria-label="Search pumps and stations" placeholder="Search pumps and stations…" className="w-full bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground" />
+    </label>
+    <Link href="/alerts" className="relative rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" aria-label="Active alerts">
+      <Icon name="alert" className="h-[18px] w-[18px]" />
+      {atRiskPumps.length > 0 && <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-status-critical px-1 text-[8px] font-bold text-white">{atRiskPumps.length}</span>}
+    </Link>
+  </header>;
 }

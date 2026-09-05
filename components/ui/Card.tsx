@@ -11,9 +11,9 @@ export function Card({ children, className, padded = true, interactive = false, 
   return (
     <div
       className={cx(
-        "bg-surface border border-border rounded-squircle-lg shadow-soft",
+        "bg-card border border-border rounded-xl shadow-sm",
         padded && "p-5",
-        interactive && "transition-all duration-200 ease-out hover:shadow-medium hover:-translate-y-0.5 cursor-pointer",
+        interactive && "transition-all duration-200 ease-out hover:shadow-md hover:border-primary cursor-pointer",
         className
       )}
       {...rest}
