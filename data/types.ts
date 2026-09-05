@@ -28,6 +28,8 @@ export interface Sensors {
 }
 
 export interface Pump {
+  id?: string;
+  station_id?: string;
   pump_id: string;
   station_code: string;
   risk_probability: number;
@@ -57,3 +59,35 @@ export interface Snapshot {
 }
 
 export type RiskLevel = "critical" | "watch" | "healthy";
+
+export interface CurrentUser {
+  id: string;
+  tenant_id: string;
+  email: string;
+  full_name: string;
+  role: "admin" | "planner" | "technician" | "viewer";
+  is_active: boolean;
+  permissions: string[];
+}
+
+export interface Capabilities {
+  dashboard: boolean;
+  assets: boolean;
+  demo_analytics: boolean;
+  live_telemetry: boolean;
+  live_rul: boolean;
+  automatic_alerts: boolean;
+  automatic_scheduling: boolean;
+  smtp_digest: boolean;
+  admin_console: boolean;
+  data_mode: string;
+}
+
+export interface AppData {
+  generated_at: string | null;
+  model_metrics: ModelMetrics;
+  stations: Station[];
+  pumps: Pump[];
+  capabilities: Capabilities;
+  user: CurrentUser;
+}

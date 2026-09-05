@@ -1,115 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAppContext } from "@/context/AppContext";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { cx } from "@/lib/utils";
-import { atRiskPumps } from "@/lib/selectors";
 
-interface NavItem {
-  href: string;
-  label: string;
-  icon: string;
-  badge?: number;
-}
-
-interface NavGroup {
-  label?: string;
-  items: NavItem[];
-}
-
-function buildGroups(alertCount: number): NavGroup[] {
-  return [
-    { items: [{ href: "/", label: "Control room", icon: "▦" }] },
-    {
-      label: "Monitoring",
-      items: [
-        { href: "/network", label: "Pipeline network", icon: "◉" },
-        { href: "/pumps", label: "Pump fleet", icon: "⚙" },
-        { href: "/flowgard", label: "Flowgard engine", icon: "◈" },
-        { href: "/alerts", label: "Active alerts", icon: "⚠", badge: alertCount },
-      ],
-    },
-    {
-      label: "Maintenance",
-      items: [
-        { href: "/workorders", label: "Work orders", icon: "▤" },
-        { href: "/schedule", label: "Service schedule", icon: "▣" },
-      ],
-    },
-    {
-      label: "Analytics",
-      items: [
-        { href: "/model", label: "Model performance", icon: "◐" },
-        { href: "/roi", label: "ROI & business case", icon: "▲" },
-      ],
-    },
-  ];
-}
+type Item = { href: string; label: string; icon: IconName; badge?: number; permission?: string };
 
 export function Sidebar() {
   const pathname = usePathname();
-  const groups = buildGroups(atRiskPumps.length);
+  const router = useRouter();
+  const { atRiskPumps, user, can } = useAppContext();
+  const groups: Array<{ label?: string; items: Item[] }> = [
+    { items: [{ href: "/", label: "Control room", icon: "dashboard" }] },
+    { label: "Monitoring", items: [{ href: "/network", label: "Pipeline network", icon: "network" }, { href: "/pumps", label: "Pump fleet", icon: "pump" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length }] },
+    { label: "Maintenance", items: [{ href: "/workorders", label: "Work orders", icon: "work" }, { href: "/schedule", label: "Service schedule", icon: "calendar" }] },
+    { label: "Analytics", items: [{ href: "/model", label: "Model performance", icon: "model" }] },
+    { label: "Administration", items: [{ href: "/admin", label: "User management", icon: "users" as IconName, permission: "manage_users" }, { href: "/settings", label: "Settings", icon: "settings" as IconName, permission: "manage_tenant" }].filter((item) => !item.permission || can(item.permission)) },
+  ];
 
-  return (
-    <aside className="glass-dark scroll-thin flex h-full w-[248px] shrink-0 flex-col overflow-y-auto border-r border-white/[0.06] text-[#cfd8e5]">
-      <div className="flex items-center gap-3 px-5 py-6">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-squircle-sm bg-gradient-to-br from-teal to-blue text-[15px] shadow-soft">
-          ◈
-        </div>
-        <div>
-          <div className="text-[13px] font-extrabold tracking-wide text-white">FLOWGARD</div>
-          <div className="text-[9px] tracking-[0.12em] text-[#7f95ad]">KPC PREDICTIVE MAINTENANCE</div>
-        </div>
-      </div>
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+    router.refresh();
+  }
 
-      <nav className="flex-1 px-3 pb-4">
-        {groups.map((group, gi) => (
-          <div key={gi} className="mb-1 pt-3 first:pt-0">
-            {group.label && (
-              <div className="px-2.5 pb-1.5 pt-2 text-[10px] font-bold tracking-[0.08em] text-[#5f7b99]">
-                {group.label}
-              </div>
-            )}
-            {group.items.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cx(
-                    "mb-0.5 flex items-center justify-between rounded-squircle-sm px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
-                    active ? "bg-teal font-bold text-white shadow-soft" : "text-[#c3d0de] hover:bg-white/[0.07] hover:text-white"
-                  )}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <span aria-hidden>{item.icon}</span>
-                    {item.label}
-                  </span>
-                  {!!item.badge && (
-                    <span className="rounded-pill bg-red px-2 py-0.5 text-[10px] font-bold text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-      </nav>
-
-      <div className="border-t border-white/[0.06] p-3">
-        <Link
-          href="/settings"
-          aria-current={pathname === "/settings" ? "page" : undefined}
-          className={cx(
-            "flex items-center gap-2.5 rounded-squircle-sm px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
-            pathname === "/settings" ? "bg-teal font-bold text-white shadow-soft" : "text-[#c3d0de] hover:bg-white/[0.07] hover:text-white"
-          )}
-        >
-          <span aria-hidden>⚙</span> Settings
-        </Link>
-      </div>
-    </aside>
-  );
+  return <aside className="scroll-thin flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar p-3 text-sidebar-foreground">
+    <div className="mb-3 flex items-center gap-2.5 px-2 py-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-primary text-xs font-black text-white">FG</div>
+      <div><p className="text-sm font-bold leading-none">Flowgard</p><p className="mt-1 text-[10px] text-sidebar-muted">Liquid Asset Intelligence</p></div>
+    </div>
+    <nav className="flex-1 space-y-3">
+      {groups.map((group, index) => <section key={index}>
+        {group.label && <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted">{group.label}</p>}
+        <div className="space-y-0.5">{group.items.map((item) => {
+          const active = pathname === item.href;
+          return <Link key={item.href} href={item.href} className={cx("flex items-center justify-between rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors", active ? "bg-sidebar-accent text-white" : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-white") }>
+            <span className="flex items-center gap-2.5"><Icon name={item.icon} className={cx("h-[18px] w-[18px]", active && "text-sidebar-primary")} />{item.label}</span>
+            {!!item.badge && <span className="rounded-full bg-status-critical px-1.5 text-[9px] font-bold text-white">{item.badge}</span>}
+          </Link>;
+        })}</div>
+      </section>)}
+    </nav>
+    <div className="mt-3 flex items-center gap-2.5 border-t border-sidebar-border px-1 pt-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary/20 text-[11px] font-bold text-sidebar-primary">{user?.full_name?.[0] ?? "F"}</div>
+      <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{user?.email}</p><p className="text-[10px] capitalize text-sidebar-muted">{user?.role}</p></div>
+      <button onClick={logout} title="Sign out" className="rounded-md p-2 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-primary"><Icon name="logout" className="h-4 w-4" /></button>
+    </div>
+  </aside>;
 }

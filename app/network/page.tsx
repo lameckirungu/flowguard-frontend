@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { stations } from "@/data/mockData";
+import { useAppContext } from "@/context/AppContext";
 import { Card } from "@/components/ui/Card";
 import { RiskBadge } from "@/components/ui/Badge";
 import { NetworkSvg } from "@/components/dashboard/NetworkSvg";
@@ -9,6 +9,7 @@ import { pct } from "@/lib/utils";
 
 export default function NetworkPage() {
   const router = useRouter();
+  const { stations } = useAppContext();
 
   return (
     <div className="animate-fade-in-up">

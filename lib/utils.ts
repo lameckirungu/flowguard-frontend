@@ -1,5 +1,4 @@
 import type { Pump, RiskLevel } from "@/data/types";
-import { stations } from "@/data/mockData";
 
 export const CRIT = 0.5;
 export const WARN = 0.15;
@@ -20,11 +19,6 @@ export function riskColorVar(r: number): string {
 
 export function pct(x: number): string {
   return (x * 100).toFixed(1) + "%";
-}
-
-export function stationName(code: string): string {
-  const s = stations.find((x) => x.code === code);
-  return s ? s.name : code;
 }
 
 export function days(h: number): string {

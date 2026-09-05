@@ -1,17 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { stations } from "@/data/mockData";
+import { useAppContext } from "@/context/AppContext";
 import { riskColorVar } from "@/lib/utils";
 
 export function NetworkSvg({ width = 700, height = 120 }: { width?: number; height?: number }) {
   const router = useRouter();
+  const { stations } = useAppContext();
   const maxKm = Math.max(...stations.map((s) => s.km_from_mombasa));
   const pad = 34;
   const span = width - pad * 2;
   const y = height / 2 + 5;
 
-  let x = stations.map((s) => pad + (s.km_from_mombasa / maxKm) * span);
+  let x = stations.map((s, index) =>
+    maxKm > 0
+      ? pad + (s.km_from_mombasa / maxKm) * span
+      : pad + (index / Math.max(stations.length - 1, 1)) * span,
+  );
   for (let i = 1; i < x.length; i++) {
     if (x[i] - x[i - 1] < 46) x[i] = x[i - 1] + 46;
   }

@@ -1,40 +1,4 @@
 "use client";
-
-import { useAppContext } from "@/context/AppContext";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { CRIT, WARN } from "@/lib/utils";
-
-const rows: [string, string][] = [
-  ["Critical risk threshold", `${(CRIT * 100).toFixed(0)}%`],
-  ["Watch threshold", `${(WARN * 100).toFixed(0)}%`],
-  ["Prediction horizon", "7 days"],
-  ["Rolling feature window", "6 readings (3 hours)"],
-  ["Model refresh cadence", "Daily, 06:00 EAT"],
-];
-
-export default function SettingsPage() {
-  const { showToast } = useAppContext();
-
-  return (
-    <div className="animate-fade-in-up">
-      <div className="mb-5">
-        <h1 className="text-[24px] font-extrabold tracking-tight">Settings</h1>
-        <p className="mt-1 text-[13px] text-text-mute">Alert thresholds and model configuration.</p>
-      </div>
-
-      <Card className="max-w-[640px]">
-        <h3 className="mb-3 text-[14.5px] font-extrabold">Alert thresholds</h3>
-        {rows.map(([k, v]) => (
-          <div key={k} className="flex justify-between border-b border-black/[0.05] py-2 text-[12.5px] last:border-0">
-            <span className="text-text-mute">{k}</span>
-            <span className="font-bold">{v}</span>
-          </div>
-        ))}
-        <div className="mt-4">
-          <Button onClick={() => showToast("Settings saved")}>Save changes</Button>
-        </div>
-      </Card>
-    </div>
-  );
-}
+import { FormEvent,useEffect,useState } from "react";import { useAppContext } from "@/context/AppContext";import { Card } from "@/components/ui/Card";import { Button } from "@/components/ui/Button";import { api,type TenantSettings } from "@/lib/resources";
+export default function SettingsPage(){const {user,showToast,capabilities}=useAppContext();const [tenant,setTenant]=useState<TenantSettings|null>(null);useEffect(()=>{if(user)void api<TenantSettings>(`/tenants/${user.tenant_id}`).then(setTenant).catch((e:Error)=>showToast(e.message))},[user,showToast]);async function save(e:FormEvent){e.preventDefault();if(!tenant)return;try{setTenant(await api<TenantSettings>(`/tenants/${tenant.id}`,{method:"PATCH",body:JSON.stringify({name:tenant.name,pressure_threshold_kpa:tenant.pressure_threshold_kpa,vibration_threshold_mm_s:tenant.vibration_threshold_mm_s,branding_display_name:tenant.branding_display_name,branding_primary_color:tenant.branding_primary_color})}));showToast("Settings saved")}catch(err){showToast((err as Error).message)}}if(!tenant)return <p className="text-sm text-muted-foreground">Loading settings…</p>;
+return <div className="animate-fade-in-up"><header className="mb-6"><h1>Settings</h1><p className="mt-1 text-sm text-muted-foreground">Tenant thresholds, branding, and integration availability.</p></header><div className="grid max-w-4xl gap-4 lg:grid-cols-2"><Card><h3 className="mb-4">Operational configuration</h3><form onSubmit={save} className="space-y-4">{[["Organisation name","name"],["Display name","branding_display_name"],["Primary colour","branding_primary_color"]].map(([label,key])=><label key={key} className="block text-xs font-semibold text-muted-foreground">{label}<input disabled={user?.role!=="admin"} value={String(tenant[key as keyof TenantSettings]??"")} onChange={e=>setTenant({...tenant,[key]:e.target.value})} className="mt-1.5 w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground outline-none focus:border-primary"/></label>)}<div className="grid grid-cols-2 gap-3">{[["Pressure threshold (kPa)","pressure_threshold_kpa"],["Vibration threshold (mm/s)","vibration_threshold_mm_s"]].map(([label,key])=><label key={key} className="block text-xs font-semibold text-muted-foreground">{label}<input type="number" disabled={user?.role!=="admin"} value={Number(tenant[key as keyof TenantSettings])} onChange={e=>setTenant({...tenant,[key]:Number(e.target.value)})} className="mt-1.5 w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm outline-none focus:border-primary"/></label>)}</div>{user?.role==="admin"&&<Button type="submit">Save changes</Button>}</form></Card><Card><h3 className="mb-4">Capabilities</h3><div className="space-y-2">{Object.entries(capabilities??{}).map(([key,value])=><div key={key} className="flex items-center justify-between border-b border-border py-2 text-sm"><span className="capitalize text-muted-foreground">{key.replaceAll("_"," ")}</span><span className={value===true?"font-semibold text-status-low":value===false?"font-semibold text-status-critical":"font-mono text-xs"}>{typeof value==="boolean"?(value?"Available":"Unavailable"):String(value)}</span></div>)}</div></Card></div></div>}

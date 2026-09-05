@@ -1,51 +1,132 @@
-# Flowgard — KPC Predictive Maintenance
+# Flowgard Web — Predictive Maintenance
 
-Control room dashboard for the Flowgard pipeline predictive-maintenance prototype: live pump fleet risk, the Flowgard reconciliation engine (physics-referenced pressure residual), model performance, and maintenance workflows across 13 KPC pump stations (Mombasa to Kisumu).
+Flowgard Web is the Next.js control-room interface for the Flowguard predictive-maintenance platform. It presents backend-managed pump risk, station status, explainability, alerts, work orders, maintenance schedules, model metrics, tenant settings, and user administration.
 
-Built with Next.js 16 (App Router), React 19, TypeScript, and Tailwind CSS 4.
+Built with Next.js 16 App Router, React 19, TypeScript, and Tailwind CSS 4. The visual system follows the locally maintained `revenue-assurance` application: warm neutral surfaces, a compact dark sidebar, system typography, outline SVG icons, status-aware cards, and accessible tables.
 
-## Getting started
+## Recommended start: complete application
+
+The frontend requires the FastAPI backend and PostgreSQL data. Start the complete application from the sibling backend repository:
 
 ```bash
-npm install
-npm run dev
+cd ../Flowguard_Backend
+docker compose up --build -d
+docker compose ps
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open http://localhost:3000 and sign in with the default local demo account:
 
-For a production build:
+```text
+Admin: admin@flowgard.com / flowgard-demo
+Planner: planner@flowgard.com / flowgard-planner
+Technician: technician@flowgard.com / flowgard-technician
+Viewer: viewer@flowgard.com / flowgard-viewer
+```
+
+API documentation is available at http://localhost:8000/docs.
+
+Stop all services with:
+
+```bash
+cd ../Flowguard_Backend
+docker compose down
+```
+
+See the backend repository README for configuration, SMTP setup, logs, database details, and data-reset instructions.
+
+## Frontend-only development
+
+Start the backend stack first, then run the Next.js development server separately. Stop the Compose frontend to release port 3000:
+
+```bash
+cd ../Flowguard_Backend
+docker compose stop frontend
+
+cd ../flowgard-web
+npm ci
+BACKEND_URL=http://localhost:8000 COOKIE_SECURE=false npm run dev
+```
+
+For a production build check:
 
 ```bash
 npm run lint
 npm run build
-npm run start
 ```
 
-## Routes
+Do not run the frontend alone unless a compatible backend is reachable through `BACKEND_URL`. Authentication, dashboard loading, and all operational workflows depend on it.
+
+## Application routes
 
 | Route | Description |
 | --- | --- |
-| `/` | Control room overview — fleet stats, network status, priority actions, model confidence |
-| `/network` | Pipeline network map and station detail |
-| `/pumps` | Filterable pump fleet table |
-| `/flowgard` | Flowgard reconciliation engine explanation and HDI rankings |
-| `/alerts` | Active alerts above the risk threshold |
-| `/workorders` | Auto-generated work orders |
-| `/schedule` | Condition-based service schedule |
-| `/model` | Model performance and confusion matrix |
-| `/roi` | ROI and business case |
-| `/settings` | Alert thresholds and configuration |
+| `/login` | Session login |
+| `/` | Fleet overview, priority actions, network status, and model confidence |
+| `/network` | Pipeline station network |
+| `/pumps` | Filterable pump fleet and pump detail modal |
+| `/flowgard` | HDI reconciliation engine and pump rankings |
+| `/alerts` | Persisted alerts, acknowledgement, automation, and SMTP digest action |
+| `/workorders` | Persisted work orders, status updates, and CSV export |
+| `/schedule` | Persisted maintenance calendar, generation, and confirmation |
+| `/model` | Classification and RUL model metrics |
+| `/settings` | Tenant thresholds, branding, and capability status |
+| `/admin` | Admin-only user management |
+
+## Data flow and authentication
+
+```text
+Browser
+  → Next.js route handlers (/api/auth and /api/backend)
+  → FastAPI (/api/v1)
+  → PostgreSQL
+```
+
+The frontend does not use `data/mockData.ts` at runtime. That file is retained as the source snapshot for the backend's idempotent demonstration bootstrap. Runtime station, pump, model, alert, work-order, schedule, settings, and user data come from FastAPI.
+
+Access and refresh tokens are stored in HTTP-only cookies by the Next.js backend-for-frontend. When an API request receives `401`, the proxy attempts one refresh-token rotation and retries the request.
+
+## Roles
+
+- `admin`: tenant settings and user administration, plus operational actions
+- `planner`: maintenance automation and operational planning actions
+- `technician`: permitted work-order lifecycle actions
+- `viewer`: read-only operational access
+
+The UI renders navigation and actions from backend-issued effective permissions, while FastAPI remains the enforcement boundary for protected mutations.
+
+The ROI page was intentionally removed: credible financial impact requires operator-specific cost, downtime, throughput, and intervention data. Flowgard does not present invented business-value claims. The bundled KPC-derived snapshot is demonstration data only; runtime tenancy, branding, thresholds, users, and assets are designed for any liquid-transport operator.
+
+## Optional capabilities
+
+The frontend reads `/api/v1/capabilities` and disables unavailable integrations instead of presenting false success notifications.
+
+- Alert and schedule automation are available in the demo stack.
+- SMTP digest delivery becomes available when backend `SMTP_*` settings are configured.
+- Live SCADA ingestion and live model/RUL execution are not included in the supplied demo environment.
 
 ## Project structure
 
-```
-app/            Route pages (App Router)
-components/     UI primitives (components/ui) and layout/feature components
-context/        Global app state (toasts, pump detail modal)
-data/           Typed mock snapshot data
-lib/            Shared formatting/selector utilities
+```text
+app/                    App Router pages and BFF route handlers
+components/layout/      Persistent application shell
+components/ui/          Cards, badges, buttons, modal, toast, bars, and SVG icons
+components/dashboard/   Dashboard visualizations
+components/pumps/       Pump fleet interface
+context/                Backend-fed application state and UI state
+lib/api.ts              Dashboard aggregate adapter
+lib/resources.ts        Typed operational resource client
+data/types.ts           Shared frontend types
+data/mockData.ts        Bootstrap source snapshot; not runtime state
 ```
 
-## Data
+## Troubleshooting
 
-Pump and station data in `data/mockData.ts` is a static snapshot. Sensor readings are synthetic and physics-informed; the classification/RUL model metrics and SHAP explanations are real model output evaluated on that synthetic data. See the backend repository for the data generation and modeling pipeline.
+If the application does not open:
+
+```bash
+cd ../Flowguard_Backend
+docker compose ps -a
+docker compose logs --tail=100 api frontend bootstrap migrate
+```
+
+Common causes are occupied ports, an unsuccessful migration/bootstrap service, or starting Next.js without a reachable backend.

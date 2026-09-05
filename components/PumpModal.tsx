@@ -2,12 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
-import { pumps } from "@/data/mockData";
 import { Modal } from "@/components/ui/Modal";
 import { RiskBadge } from "@/components/ui/Badge";
 import { ShapTrack } from "@/components/ui/ShapTrack";
 import { Button } from "@/components/ui/Button";
-import { pct, riskColorVar, stationName } from "@/lib/utils";
+import { pct, riskColorVar } from "@/lib/utils";
 
 const COMPONENT_LABELS: Record<string, string> = {
   bearing: "Bearing",
@@ -20,12 +19,24 @@ function componentColor(v: number) {
 }
 
 export function PumpModal() {
-  const { openPumpId, closeModal, showToast } = useAppContext();
+  const { openPumpId, closeModal, showToast, pumps, stationName, refreshData, can } = useAppContext();
   const router = useRouter();
   const pump = pumps.find((p) => p.pump_id === openPumpId) ?? null;
 
-  function raiseWorkOrder() {
-    if (!pump) return;
+  async function raiseWorkOrder() {
+    if (!pump?.id) {
+      showToast("This pump is missing its backend identifier");
+      return;
+    }
+    const response = await fetch(`/api/backend/api/v1/work-orders/auto-generate/pumps/${pump.id}`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      const result = (await response.json().catch(() => null)) as { detail?: string } | null;
+      showToast(result?.detail ?? `Unable to raise a work order for ${pump.pump_id}`);
+      return;
+    }
+    await refreshData();
     closeModal();
     showToast(`Work order raised for ${pump.pump_id}`);
     router.push("/workorders");
@@ -119,7 +130,7 @@ export function PumpModal() {
           </div>
 
           <div className="flex gap-2.5">
-            <Button onClick={raiseWorkOrder}>Raise work order</Button>
+            {can("manage_work_orders") && <Button onClick={raiseWorkOrder}>Raise work order</Button>}
             <Button variant="ghost" onClick={closeModal}>
               Close
             </Button>

@@ -2,42 +2,18 @@
 
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
-import { stations, pumps, modelMetrics } from "@/data/mockData";
-import { atRiskPumps, criticalPumps } from "@/lib/selectors";
 import { Card } from "@/components/ui/Card";
 import { RiskBadge } from "@/components/ui/Badge";
 import { NetworkSvg } from "@/components/dashboard/NetworkSvg";
-import { days, pct, riskWord, sortByRiskDesc, stationName } from "@/lib/utils";
-
-const statTiles = [
-  {
-    icon: "⚠",
-    iconBg: "bg-red-light",
-    label: "Pumps at critical risk",
-    value: criticalPumps.length,
-    trend: "Requires action this week",
-    trendClass: "text-red",
-  },
-  {
-    icon: "◐",
-    iconBg: "bg-amber-light",
-    label: "Pumps on watch",
-    value: atRiskPumps.length - criticalPumps.length,
-    trend: "Monitor, no action yet",
-    trendClass: "text-text-mute",
-  },
-  {
-    icon: "✓",
-    iconBg: "bg-green-light",
-    label: "Healthy pumps",
-    value: pumps.length - atRiskPumps.length,
-    trend: "Operating normally",
-    trendClass: "text-green",
-  },
-];
+import { days, pct, riskWord, sortByRiskDesc } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const { openPump } = useAppContext();
+  const { openPump, stations, pumps, modelMetrics, atRiskPumps, criticalPumps, stationName } = useAppContext();
+  const statTiles = [
+    { icon: "⚠", iconBg: "bg-red-light", label: "Pumps at critical risk", value: criticalPumps.length, trend: "Requires action this week", trendClass: "text-red" },
+    { icon: "◐", iconBg: "bg-amber-light", label: "Pumps on watch", value: atRiskPumps.length - criticalPumps.length, trend: "Monitor, no action yet", trendClass: "text-text-mute" },
+    { icon: "✓", iconBg: "bg-green-light", label: "Healthy pumps", value: pumps.length - atRiskPumps.length, trend: "Operating normally", trendClass: "text-green" },
+  ];
   const earliestFailure = atRiskPumps.filter((p) => p.rul_hours !== null);
   const earliestDays = earliestFailure.length
     ? days(Math.min(...earliestFailure.map((p) => p.rul_hours!)))
