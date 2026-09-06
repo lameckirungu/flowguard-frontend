@@ -7,6 +7,7 @@ import { loadAppData } from "@/lib/api";
 
 interface AppContextValue {
   loading: boolean;
+  lastUpdated: string | null;
   error: string | null;
   stations: Station[];
   pumps: Pump[];
@@ -40,7 +41,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refreshData = useCallback(async () => {
-    setLoading(true);
+    setLoading(data === null);
     setError(null);
     try {
       setData(await loadAppData());
@@ -53,12 +54,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [pathname, router]);
+  }, [data, pathname, router]);
 
   useEffect(() => {
     if (pathname === "/login" || data) return;
     const timer = window.setTimeout(() => void refreshData(), 0);
     return () => window.clearTimeout(timer);
+  }, [pathname, data, refreshData]);
+
+  useEffect(() => {
+    if (pathname === "/login" || !data) return;
+    const timer = window.setInterval(() => void refreshData(), 15000);
+    return () => window.clearInterval(timer);
   }, [pathname, data, refreshData]);
 
   const showToast = useCallback((message: string) => {
@@ -92,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       loading,
+      lastUpdated: data?.generated_at ?? null,
       error,
       stations,
       pumps,
