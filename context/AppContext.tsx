@@ -7,7 +7,9 @@ import { loadAppData } from "@/lib/api";
 
 interface AppContextValue {
   loading: boolean;
+  hasData: boolean;
   lastUpdated: string | null;
+  freshnessStatus: string;
   error: string | null;
   stations: Station[];
   pumps: Pump[];
@@ -99,7 +101,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       loading,
+      hasData: data !== null,
       lastUpdated: data?.generated_at ?? null,
+      freshnessStatus: data?.freshness_status ?? "unavailable",
       error,
       stations,
       pumps,

@@ -85,6 +85,8 @@ export interface Capabilities {
 
 export interface AppData {
   generated_at: string | null;
+  data_mode: string;
+  freshness_status: string;
   model_metrics: ModelMetrics;
   stations: Station[];
   pumps: Pump[];

@@ -9,7 +9,7 @@ import { useAppContext } from "@/context/AppContext";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { loading, error } = useAppContext();
+  const { loading, error, hasData } = useAppContext();
   if (pathname === "/login") return <>{children}</>;
   if (loading) {
     return (
@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  if (error) {
+  if (error && !hasData) {
     return (
       <div className="flex h-full items-center justify-center bg-bg p-6">
         <div className="max-w-md rounded-squircle bg-surface p-6 text-center shadow-soft">

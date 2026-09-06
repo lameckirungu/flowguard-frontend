@@ -2,6 +2,10 @@ import type { AppData, Capabilities, CurrentUser, Pump, Station } from "@/data/t
 
 interface BackendDashboard {
   generated_at: string | null;
+  data_mode?: string;
+  freshness_status?: string;
+  latest_sensor_at?: string | null;
+  latest_prediction_at?: string | null;
   stations: Array<{
     code: string;
     name: string;
@@ -106,6 +110,8 @@ export async function loadAppData(): Promise<AppData> {
   }));
   return {
     generated_at: dashboard.generated_at,
+    data_mode: dashboard.data_mode ?? capabilities.data_mode,
+    freshness_status: dashboard.freshness_status ?? "demo",
     stations,
     pumps,
     model_metrics: {
