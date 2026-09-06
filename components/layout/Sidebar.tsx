@@ -14,7 +14,7 @@ export function Sidebar() {
   const { atRiskPumps, user, can } = useAppContext();
   const groups: Array<{ label?: string; items: Item[] }> = [
     { items: [{ href: "/", label: "Control room", icon: "dashboard" }] },
-    { label: "Monitoring", items: [{ href: "/network", label: "Pipeline network", icon: "network" }, { href: "/pumps", label: "Pump fleet", icon: "pump" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length }] },
+    { label: "Monitoring", items: [{ href: "/assets", label: "Asset registry", icon: "pump" },{ href: "/network", label: "Pipeline network", icon: "network" }, { href: "/pumps", label: "Pump fleet", icon: "pump" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length }] },
     { label: "Maintenance", items: [{ href: "/workorders", label: "Work orders", icon: "work" }, { href: "/schedule", label: "Service schedule", icon: "calendar" }] },
     { label: "Analytics", items: [{ href: "/ingestion", label: "Data operations", icon: "model" },{ href: "/model", label: "Model performance", icon: "model" }, { href: "/model/governance", label: "Model governance", icon: "settings" as IconName }] },
     { label: "Administration", items: [{ href: "/admin", label: "User management", icon: "users" as IconName, permission: "manage_users" }, { href: "/settings", label: "Settings", icon: "settings" as IconName, permission: "manage_tenant" }].filter((item) => !item.permission || can(item.permission)) },
