@@ -15,7 +15,7 @@
   --color-amber: #b6790a; --color-amber-light: #fdf3de;
   --color-red: #d03b3b; --color-red-light: #fdecec;
   --color-purple: #7b61c9; --color-purple-light: #f0ecfb;
-  --color-sidebar: #1f1b19; --color-sidebar-foreground: #f5f2ef; --color-sidebar-muted: #b2aeac; --color-sidebar-border: #322019; --color-sidebar-accent: #3f201e; --color-sidebar-primary: #b3312c;
+  --color-dark: #1f1b19; --color-sidebar: #1f1b19; --color-sidebar-foreground: #f5f2ef; --color-sidebar-muted: #b2aeac; --color-sidebar-border: #322019; --color-sidebar-accent: #3f201e; --color-sidebar-primary: #b3312c;
   --color-status-critical: #d03b3b; --color-status-critical-bg: #fdecec; --color-status-high: #ec835a; --color-status-high-bg: #fdf0e9; --color-status-medium: #b6790a; --color-status-medium-bg: #fdf3de; --color-status-low: #0ca30c; --color-status-low-bg: #eaf7ea; --color-status-info: #2a78d6; --color-status-info-bg: #eaf2fc;
   --radius-squircle-sm: 8px; --radius-squircle: 10px; --radius-squircle-lg: 12px; --radius-squircle-xl: 16px; --radius-pill: 999px;
   --shadow-soft: 0 1px 2px rgba(38,34,31,.04), 0 3px 10px rgba(38,34,31,.05);
