@@ -7,7 +7,7 @@ import { useAppContext } from "@/context/AppContext";
 import { Icon } from "@/components/ui/Icon";
 
 export function Topbar() {
-  const { openPump, pumps, stations, atRiskPumps } = useAppContext();
+  const { openPump, pumps, stations, atRiskPumps, lastUpdated } = useAppContext();
   const router = useRouter();
   const [query, setQuery] = useState("");
   function search(value: string) {
@@ -24,6 +24,9 @@ export function Topbar() {
       <Icon name="search" className="h-4 w-4 shrink-0" />
       <input value={query} onChange={(event) => search(event.target.value)} aria-label="Search pumps and stations" placeholder="Search pumps and stations…" className="w-full bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground" />
     </label>
+    <div className="hidden text-[11px] text-muted-foreground lg:block">
+      {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Awaiting data"}
+    </div>
     <Link href="/alerts" className="relative rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" aria-label="Active alerts">
       <Icon name="alert" className="h-[18px] w-[18px]" />
       {atRiskPumps.length > 0 && <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-status-critical px-1 text-[8px] font-bold text-white">{atRiskPumps.length}</span>}
