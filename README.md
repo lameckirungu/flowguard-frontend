@@ -17,10 +17,10 @@ docker compose ps
 Open http://localhost:3000 and sign in with the default local demo account:
 
 ```text
-Admin: admin@flowgard.com / flowgard-demo
-Planner: planner@flowgard.com / flowgard-planner
-Technician: technician@flowgard.com / flowgard-technician
-Viewer: viewer@flowgard.com / flowgard-viewer
+Admin: admin@flowgard.com / Flowgard-UAT-2026!
+Planner: planner@flowgard.com / Flowgard-UAT-2026!
+Technician: technician@flowgard.com / Flowgard-UAT-2026!
+Viewer: viewer@flowgard.com / Flowgard-UAT-2026!
 ```
 
 API documentation is available at http://localhost:8000/docs.
