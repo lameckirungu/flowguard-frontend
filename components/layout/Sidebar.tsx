@@ -14,9 +14,9 @@ export function Sidebar() {
   const { atRiskPumps, user, can } = useAppContext();
   const groups: Array<{ label?: string; items: Item[] }> = [
     { items: [{ href: "/", label: "Control room", icon: "dashboard" }] },
-    { label: "Monitoring", items: [{ href: "/assets", label: "Asset registry", icon: "pump" },{ href: "/network", label: "Pipeline network", icon: "network" }, { href: "/pumps", label: "Pump fleet", icon: "pump" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length }] },
-    { label: "Maintenance", items: [{ href: "/workorders", label: "Work orders", icon: "work" }, { href: "/schedule", label: "Service schedule", icon: "calendar" }] },
-    { label: "Analytics", items: [{ href: "/ingestion", label: "Data operations", icon: "model" },{ href: "/maintenance-results", label: "Maintenance outcomes", icon: "model" },{ href: "/model", label: "Model performance", icon: "model" }, { href: "/model/governance", label: "Model governance", icon: "settings" as IconName }] },
+    { label: "Monitoring", items: [{ href: "/assets", label: "Asset registry", icon: "pump", permission: "manage_assets" },{ href: "/network", label: "Pipeline network", icon: "network", permission: "view_operations" }, { href: "/pumps", label: "Pump fleet", icon: "pump", permission: "view_operations" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine", permission: "view_operations" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length, permission: "view_operations" }] },
+    { label: "Maintenance", items: [{ href: "/workorders", label: "Work orders", icon: "work", permission: "view_operations" }, { href: "/schedule", label: "Service schedule", icon: "calendar", permission: "manage_schedule" }] },
+    { label: "Analytics", items: [{ href: "/ingestion", label: "Data operations", icon: "model", permission: "manage_models" },{ href: "/maintenance-results", label: "Maintenance outcomes", icon: "model", permission: "export_reports" },{ href: "/model", label: "Model performance", icon: "model", permission: "view_operations" }, { href: "/model/governance", label: "Model governance", icon: "settings" as IconName, permission: "run_models" }] },
     { label: "Administration", items: [{ href: "/admin", label: "User management", icon: "users" as IconName, permission: "manage_users" }, { href: "/settings", label: "Settings", icon: "settings" as IconName, permission: "manage_tenant" }].filter((item) => !item.permission || can(item.permission)) },
   ];
 
@@ -34,7 +34,7 @@ export function Sidebar() {
     <nav className="flex-1 space-y-3">
       {groups.map((group, index) => <section key={index}>
         {group.label && <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted">{group.label}</p>}
-        <div className="space-y-0.5">{group.items.map((item) => {
+        <div className="space-y-0.5">{group.items.filter((item) => !item.permission || can(item.permission)).map((item) => {
           const active = pathname === item.href;
           return <Link key={item.href} href={item.href} className={cx("flex items-center justify-between rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors", active ? "bg-sidebar-accent text-white" : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-white") }>
             <span className="flex items-center gap-2.5"><Icon name={item.icon} className={cx("h-[18px] w-[18px]", active && "text-sidebar-primary")} />{item.label}</span>

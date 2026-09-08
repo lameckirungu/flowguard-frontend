@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { PumpModal } from "@/components/PumpModal";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
@@ -9,7 +9,13 @@ import { useAppContext } from "@/context/AppContext";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { loading, error, hasData } = useAppContext();
+  const router = useRouter();
+  const { loading, error, hasData, user, can } = useAppContext();
+  const requiredPermission = pathname === "/assets" ? "manage_assets" : pathname === "/schedule" ? "manage_schedule" : pathname === "/ingestion" ? "manage_models" : pathname === "/maintenance-results" ? "export_reports" : pathname === "/model/governance" ? "run_models" : pathname === "/admin" ? "manage_users" : pathname === "/settings" ? "manage_tenant" : pathname !== "/" ? "view_operations" : null;
+  if (!loading && user && requiredPermission && !can(requiredPermission)) {
+    router.replace("/");
+    return null;
+  }
   if (pathname === "/login") return <>{children}</>;
   if (loading) {
     return (
