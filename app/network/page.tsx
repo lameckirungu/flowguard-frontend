@@ -5,6 +5,7 @@ import { useAppContext } from "@/context/AppContext";
 import { Card } from "@/components/ui/Card";
 import { RiskBadge } from "@/components/ui/Badge";
 import { NetworkSvg } from "@/components/dashboard/NetworkSvg";
+import { NetworkMap } from "@/components/dashboard/NetworkMap";
 import { pct } from "@/lib/utils";
 
 export default function NetworkPage() {
@@ -21,6 +22,12 @@ export default function NetworkPage() {
       </div>
 
       <Card className="mb-4">
+        <div className="mb-3 flex items-center justify-between"><div><h3 className="text-[14.5px] font-extrabold">Geographic view</h3><p className="mt-1 text-xs text-text-mute">Stations and the transport route plotted from configured coordinates.</p></div><span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-text-mute">Interactive map</span></div>
+        <NetworkMap />
+      </Card>
+
+      <Card className="mb-4">
+        <h3 className="mb-3 text-[14.5px] font-extrabold">Schematic view</h3>
         <NetworkSvg width={900} height={130} />
       </Card>
 
