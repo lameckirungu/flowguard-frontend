@@ -2,9 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAppContext } from "@/context/AppContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { clearSession, refreshData } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +24,9 @@ export default function LoginPage() {
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.detail ?? "Unable to sign in");
+      clearSession();
+      await refreshData();
       router.push("/");
-      router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to sign in");
     } finally {

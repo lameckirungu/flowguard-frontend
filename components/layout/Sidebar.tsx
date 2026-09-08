@@ -11,7 +11,7 @@ type Item = { href: string; label: string; icon: IconName; badge?: number; permi
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { atRiskPumps, user, can } = useAppContext();
+  const { atRiskPumps, user, can, clearSession } = useAppContext();
   const groups: Array<{ label?: string; items: Item[] }> = [
     { items: [{ href: "/", label: "Control room", icon: "dashboard" }] },
     { label: "Monitoring", items: [{ href: "/network", label: "Pipeline network", icon: "network", permission: "view_operations" }, { href: "/pumps", label: "Pump fleet", icon: "pump", permission: "view_operations" }, { href: "/flowgard", label: "Flowgard engine", icon: "engine", permission: "view_operations" }, { href: "/alerts", label: "Active alerts", icon: "alert", badge: atRiskPumps.length, permission: "view_operations" }] },
@@ -21,9 +21,9 @@ export function Sidebar() {
   ];
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    clearSession();
     router.replace("/login");
-    router.refresh();
   }
 
   return <aside className="scroll-thin flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar p-3 text-sidebar-foreground">

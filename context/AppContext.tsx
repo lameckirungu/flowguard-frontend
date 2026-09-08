@@ -20,6 +20,7 @@ interface AppContextValue {
   criticalPumps: Pump[];
   healthyPumps: Pump[];
   refreshData: () => Promise<void>;
+  clearSession: () => void;
   stationName: (code: string) => string;
   toastMessage: string | null;
   showToast: (message: string) => void;
@@ -83,6 +84,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [data]);
 
   const closeModal = useCallback(() => setOpenPumpId(null), []);
+  const clearSession = useCallback(() => {
+    setData(null);
+    setError(null);
+    setOpenPumpId(null);
+    setLoading(false);
+  }, []);
   const can = useCallback((permission: string) => data?.user.permissions.includes(permission) ?? false, [data]);
 
   const pumps = useMemo(() => data?.pumps ?? [], [data]);
@@ -114,6 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       criticalPumps,
       healthyPumps,
       refreshData,
+      clearSession,
       stationName,
       toastMessage: toastVisible ? toastMessage : null,
       showToast,
@@ -122,7 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       closeModal,
       can,
     }),
-    [loading, error, stations, pumps, data, atRiskPumps, criticalPumps, healthyPumps, refreshData, stationName, toastMessage, toastVisible, showToast, openPumpId, openPump, closeModal, can]
+    [loading, error, stations, pumps, data, atRiskPumps, criticalPumps, healthyPumps, refreshData, clearSession, stationName, toastMessage, toastVisible, showToast, openPumpId, openPump, closeModal, can]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
