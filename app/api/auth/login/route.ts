@@ -10,8 +10,11 @@ export async function POST(request: Request) {
     body: JSON.stringify(body),
     cache: "no-store",
   });
-  const payload = await upstream.json();
+  const raw = await upstream.text();
+  let payload: { detail?: string; user?: unknown; access_token?: string; refresh_token?: string; expires_in?: number };
+  try { payload = raw ? JSON.parse(raw) : {}; } catch { payload = { detail: "Authentication service returned an invalid response" }; }
   if (!upstream.ok) return NextResponse.json(payload, { status: upstream.status });
+  if (!payload.access_token || !payload.refresh_token || !payload.user) return NextResponse.json({ detail: "Authentication service returned an incomplete response" }, { status: 502 });
   const response = NextResponse.json({ user: payload.user });
   const secure = process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production";
   response.cookies.set("flowgard_access", payload.access_token, {
