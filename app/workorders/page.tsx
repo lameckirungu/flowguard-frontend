@@ -14,6 +14,8 @@ export default function WorkOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [outcome, setOutcome] = useState("confirmed_failure");
+  const [condition, setCondition] = useState("serviceable");
 
   const load = useCallback(async () => {
     try { setItems(await api<WorkOrder[]>("/work-orders")); setError(null); }
@@ -32,7 +34,7 @@ export default function WorkOrdersPage() {
   async function complete(item: WorkOrder) {
     if (item.priority === "high" && !note.trim()) { showToast("Add a completion note for high-priority work"); return; }
     try {
-      await api(`/work-orders/${item.id}`, { method: "PATCH", body: JSON.stringify({ status: "completed", completion_note: note.trim() || null }) });
+      await api(`/work-orders/${item.id}/outcome`, { method: "POST", body: JSON.stringify({ completion_note: note.trim(), outcome, post_maintenance_condition: condition }) });
       setActiveId(null); setNote(""); showToast("Work order completed"); await load();
     } catch (e) { showToast((e as Error).message); }
   }
